@@ -366,7 +366,7 @@ function renderHome(){
   </div>
   <div class="card" style="font-size:13px;line-height:2;padding:12px 16px;background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.2)">
     <span style="font-weight:600;color:var(--gold)">Premios: </span>
-    <span style="color:var(--text2)">🥇 1º: <b>50%</b> del bote · 🥈 2º: <b>30%</b> · 🥉 3º: <b>20%</b> · 💀 Último: recupera la inscripción</span>
+    <span style="color:var(--text2)">🥇 1º: <b>40%</b> del bote · 🥈 2º: <b>20%</b> · 🥉 3º: <b>10%</b> · 🏛️ Asociación: <b>30%</b> · 💀 Último: recupera la inscripción</span>
   </div>`;
   app.innerHTML=h;
 }
@@ -818,7 +818,7 @@ function renderRank(){
   const rank=getRank(),mx=rank[0]?.pts||1;
   const pot=getPrizePot();
   const lastIdx=rank.length-1;
-  const prize1=Math.round(pot*0.5),prize2=Math.round(pot*0.3),prize3=Math.round(pot*0.2);
+  const prize1=Math.round(pot*0.4),prize2=Math.round(pot*0.2),prize3=Math.round(pot*0.1);
   const cuota=S.meta?.cuota||15;
   let h=`<div class="nav">
     <button class="btn btn-sm btn-ghost" onclick="go('home')">← Volver</button>
@@ -830,9 +830,9 @@ function renderRank(){
     h+=`<div class="card" style="margin-bottom:12px;background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.3)">
     <h3 style="margin-bottom:10px;color:var(--gold)">💰 Bote — ${pagados} pagados · ${pot}€ recaudados</h3>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
-      <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px">🥇 1º (50%)</div><div style="font-size:20px;font-weight:700;color:var(--gold)">${prize1}€</div></div>
-      <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px">🥈 2º (30%)</div><div style="font-size:20px;font-weight:700;color:var(--silver)">${prize2}€</div></div>
-      <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px">🥉 3º (20%)</div><div style="font-size:20px;font-weight:700;color:var(--bronze)">${prize3}€</div></div>
+      <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px">🥇 1º (40%)</div><div style="font-size:20px;font-weight:700;color:var(--gold)">${prize1}€</div></div>
+      <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px">🥈 2º (20%)</div><div style="font-size:20px;font-weight:700;color:var(--silver)">${prize2}€</div></div>
+      <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px">🥉 3º (10%)</div><div style="font-size:20px;font-weight:700;color:var(--bronze)">${prize3}€</div></div>
     </div>
     <div style="margin-top:8px;font-size:12px;color:var(--text2);border-top:1px solid var(--border);padding-top:8px">🔴 Último: recupera los ${cuota}€ de inscripción</div>
     </div>`;
@@ -946,7 +946,7 @@ function renderAdminPagos(){
       <div><span style="color:var(--text2)">Recaudado</span><br><b style="font-size:18px;color:var(--gold)">${pot}€</b></div>
     </div>
     <div style="margin-top:10px;font-size:13px;color:var(--text2);border-top:1px solid var(--border);padding-top:8px">
-      Premios estimados: 🥇 <b>${Math.round(pot*0.5)}€</b> · 🥈 <b>${Math.round(pot*0.3)}€</b> · 🥉 <b>${Math.round(pot*0.2)}€</b> · 💀 último recupera <b>${S.meta.cuota}€</b>
+      Premios estimados: 🥇 <b>${Math.round(pot*0.4)}€</b> · 🥈 <b>${Math.round(pot*0.2)}€</b> · 🥉 <b>${Math.round(pot*0.1)}€</b> · 🏛️ Asociación <b>${Math.round(pot*0.3)}€</b> · 💀 último recupera <b>${S.meta.cuota}€</b>
     </div>
   </div>`;
 
