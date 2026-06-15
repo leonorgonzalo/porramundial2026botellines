@@ -13,12 +13,11 @@ function json(data, status = 200) {
 
 async function handleData(env) {
   const supabase = getSupabase(env)
-  const [{ data: parts }, { data: res }, { data: pays }, { data: metas }, { data: bonuses }] = await Promise.all([
+  const [{ data: parts }, { data: res }, { data: pays }, { data: metas }] = await Promise.all([
     supabase.from('participants_botellines').select('*'),
     supabase.from('results_botellines').select('*').eq('id', 'main').single(),
     supabase.from('payments_botellines').select('*'),
     supabase.from('meta_botellines').select('*').eq('id', 'main').single(),
-    supabase.from('bonus_botellines').select('*'),
   ])
 
   const participantsMap = {}
@@ -31,34 +30,12 @@ async function handleData(env) {
     if (p.pagado) paymentsMap[p.email] = { pagado: true, fecha: p.fecha }
   }
 
-  const bonusMap = {}
-  for (const b of (bonuses || [])) {
-    bonusMap[b.email] = b.pts
-  }
-
   return json({
     participants: participantsMap,
     results: res?.data || {},
     payments: paymentsMap,
-    bonus: bonusMap,
     meta: { cuota: parseInt(metas?.cuota || '15'), locked: metas?.locked || false },
   })
-}
-
-async function handleBonus(request, env) {
-  const supabase = getSupabase(env)
-  const { email, pts } = await request.json()
-  if (!email) return json({ error: 'Missing email' }, 400)
-  if (pts === 0) {
-    await supabase.from('bonus_botellines').delete().eq('email', email)
-  } else {
-    const { error } = await supabase.from('bonus_botellines').upsert(
-      { email, pts: parseInt(pts) || 0, updated_at: new Date().toISOString() },
-      { onConflict: 'email' }
-    )
-    if (error) return json({ error: error.message }, 500)
-  }
-  return json({ ok: true })
 }
 
 async function handleParticipant(request, env) {
@@ -135,10 +112,7 @@ export default {
     if (path === '/api/payment' && request.method === 'POST') return handlePayment(request, env)
     if (path === '/api/lock' && request.method === 'POST') return handleMeta(request, env)
     if (path === '/api/meta' && request.method === 'POST') return handleMeta(request, env)
-    if (path === '/api/bonus' && request.method === 'POST') return handleBonus(request, env)
 
     return env.ASSETS.fetch(request)
   }
-}
-
 }
