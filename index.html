@@ -412,6 +412,7 @@ function checkReg(){
 
 // ── QUINIELA ──
 let qtab='fase1';
+let rankTab='rank';
 function renderQ(){
   const p=S.participants[S.user];
   const lk=isLocked();
@@ -873,7 +874,12 @@ function renderRank(){
   let h=`<div class="nav">
     <button class="btn btn-sm btn-ghost" onclick="go('home')">← Volver</button>
     <span class="nav-title">Clasificación</span>
-    <span class="count-pill">${rank.length} participantes</span></div>`;
+    <span class="count-pill">${rank.length} participantes</span></div>
+  <div class="sticky-tabs"><div class="tab-bar">
+    <button class="tab${rankTab==='rank'?' active':''}" onclick="setRankTab('rank')">🏆 Clasificación</button>
+    <button class="tab${rankTab==='pron'?' active':''}" onclick="setRankTab('pron')">📊 Pronósticos</button>
+  </div></div>`;
+  if(rankTab==='pron'){app.innerHTML=h+renderPronosticos();return;}
   // Prize pool card
   const pagados=Object.keys(S.payments||{}).length;
   if(pot>0){
@@ -909,6 +915,73 @@ function renderRank(){
     <span class="rank-pts">${p.pts}</span></div>`;
   });
   h+='</div>';app.innerHTML=h;
+}
+
+function setRankTab(t){rankTab=t;renderRank();}
+
+const FLAGS={
+  'MEXICO':'🇲🇽','SUDAFRICA':'🇿🇦','COREA DEL SUR':'🇰🇷','REP. CHECA':'🇨🇿',
+  'CANADA':'🇨🇦','BOSNIA':'🇧🇦','QATAR':'🇶🇦','SUIZA':'🇨🇭',
+  'BRASIL':'🇧🇷','MARRUECOS':'🇲🇦','HAITI':'🇭🇹','ESCOCIA':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'ESTADOS UNIDOS':'🇺🇸','PARAGUAY':'🇵🇾','AUSTRALIA':'🇦🇺','TURQUIA':'🇹🇷',
+  'ALEMANIA':'🇩🇪','CURAZAO':'🇨🇼','COSTA DE MARFIL':'🇨🇮','ECUADOR':'🇪🇨',
+  'PAISES BAJOS':'🇳🇱','JAPON':'🇯🇵','SUECIA':'🇸🇪','TUNEZ':'🇹🇳',
+  'BELGICA':'🇧🇪','EGIPTO':'🇪🇬','IRAN':'🇮🇷','NUEVA ZELANDA':'🇳🇿',
+  'ESPAÑA':'🇪🇸','CABO VERDE':'🇨🇻','ARABIA SAUDI':'🇸🇦','URUGUAY':'🇺🇾',
+  'FRANCIA':'🇫🇷','SENEGAL':'🇸🇳','IRAQ':'🇮🇶','NORUEGA':'🇳🇴',
+  'ARGENTINA':'🇦🇷','ARGELIA':'🇩🇿','AUSTRIA':'🇦🇹','JORDANIA':'🇯🇴',
+  'PORTUGAL':'🇵🇹','R.D.CONGO':'🇨🇩','UZBEKISTAN':'🇺🇿','COLOMBIA':'🇨🇴',
+  'INGLATERRA':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','CROACIA':'🇭🇷','GHANA':'🇬🇭','PANAMA':'🇵🇦',
+};
+
+function renderPronosticos(){
+  const parts=Object.values(S.participants);
+  const n=parts.length||1;
+  const rondas=[
+    {key:'f4',label:'16avos'},
+    {key:'f5',label:'Octavos'},
+    {key:'f6',label:'Cuartos'},
+    {key:'f7',label:'Semis'},
+    {key:'f8',label:'Final/Campeón'},
+  ];
+  const counts={};
+  TODOS.forEach(eq=>{counts[eq]={f4:0,f5:0,f6:0,f7:0,f8:0};});
+  parts.forEach(p=>{
+    ['f4','f5','f6','f7'].forEach(k=>{
+      (p[k]||[]).forEach(eq=>{if(counts[eq])counts[eq][k]++;});
+    });
+    if(p.f8&&counts[p.f8]) counts[p.f8].f8++;
+  });
+  const equipos=TODOS.slice().sort((a,b)=>{
+    const scoreA=counts[a].f4+counts[a].f5*2+counts[a].f6*3+counts[a].f7*4+counts[a].f8*5;
+    const scoreB=counts[b].f4+counts[b].f5*2+counts[b].f6*3+counts[b].f7*4+counts[b].f8*5;
+    return scoreB-scoreA;
+  });
+  let h='<div style="margin-top:4px">';
+  equipos.forEach(eq=>{
+    const c=counts[eq];
+    const maxCnt=Math.max(c.f4,c.f5,c.f6,c.f7,c.f8);
+    if(maxCnt===0) return;
+    const flag=FLAGS[eq]||'🏳️';
+    h+=`<div class="card" style="padding:12px 16px;margin-bottom:8px">
+      <div style="font-weight:600;font-size:14px;margin-bottom:8px">${flag} ${eq}</div>
+      ${rondas.map(r=>{
+        const cnt=c[r.key];
+        const pct=Math.round(cnt/n*100);
+        if(cnt===0) return '';
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px">
+          <span style="width:80px;color:var(--text2);flex-shrink:0">${r.label}</span>
+          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:var(--accent);border-radius:3px"></div>
+          </div>
+          <span style="width:36px;text-align:right;color:var(--text2);font-weight:600">${pct}%</span>
+          <span style="width:24px;text-align:right;color:var(--text3)">${cnt}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  });
+  h+='</div>';
+  return h;
 }
 
 // ── ADMIN ──
