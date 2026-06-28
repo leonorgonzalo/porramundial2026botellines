@@ -584,7 +584,7 @@ function buildBracket(uid,isAdmin){
     const bkey='T:'+ts.key;
     const sel=br[bkey]||'';
     const fn=isAdmin?`setAdminTercero('${bkey}',this.value)`:`setTercero('${bkey}',this.value)`;
-    const optTeams=ts.opts.map(g2=>({g:g2,eq:isAdmin?getAdminPos(1,g2)||`3ºGr.${g2}`:getPos(uid,3,g2)||`3ºGr.${g2}`}));
+    const optTeams=ts.opts.map(g2=>({g:g2,eq:isAdmin?getAdminPos(3,g2)||`3ºGr.${g2}`:getPos(uid,3,g2)||`3ºGr.${g2}`}));
     const terceroCorrect=showGreen&&!!sel&&(S.results?.f3||[]).includes(sel);
     h+=`<div class="tercero-row">
       <span class="tlabel">3º de grupos ${ts.opts.join('/')}</span>
