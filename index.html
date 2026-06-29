@@ -282,10 +282,10 @@ function syncFases(uid){
   GRUPOS_ORDER.forEach(g=>{f3.push(getPos(uid,1,g));f3.push(getPos(uid,2,g));});
   TERCEROS_SLOTS.forEach(ts=>{const v=br['T:'+ts.key];if(v)f3.push(v);});
   p.f3=[...new Set(f3.filter(Boolean))];
-  const pf4set=new Set();
-  GRUPOS_ORDER.forEach(g=>{const g1=getPos(uid,1,g);const g2=getPos(uid,2,g);if(g1)pf4set.add(g1);if(g2)pf4set.add(g2);});
-  TERCEROS_SLOTS.forEach(ts=>{const v=br['T:'+ts.key];if(v)pf4set.add(v);});
-  p.f4=[...pf4set];
+  const pf4arr=[];
+  GRUPOS_ORDER.forEach(g=>{const g1=getPos(uid,1,g);const g2=getPos(uid,2,g);if(g1)pf4arr.push(g1);if(g2)pf4arr.push(g2);});
+  TERCEROS_SLOTS.forEach(ts=>{const v=br['T:'+ts.key];if(v)pf4arr.push(v);});
+  p.f4=pf4arr;
   p.f5=MATCH16.map(m=>br['w_'+m.id]||'').filter(Boolean);
   p.f6=OCT8.map(m=>br['w_'+m.id]||'').filter(Boolean);
   p.f7=CUA4.map(m=>br['w_'+m.id]||'').filter(Boolean);
