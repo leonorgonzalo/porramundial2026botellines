@@ -461,33 +461,6 @@ function renderQ(){
     <button class="btn btn-sm btn-ghost" onclick="go('home')">← Inicio</button>
     <span class="nav-title">${p.nombre}</span><span></span></div>`;
   if(lk) h+=`<div class="lock-banner">🔒 Las quinielas están <b>bloqueadas</b>. Puedes consultar tu pronóstico, pero ya no se puede modificar. Los aciertos aparecen <b style="color:#4ade80">en verde</b>.</div>`;
-  if(lk){
-    const d=calcPtsDetalle(S.user);
-    const desglose=[
-      ['Grupos',d.grupos,'2pts'],
-      ['España',d.españa,'10pts'],
-      ['16avos',d.f4,'5pts'],
-      ['Octavos',d.f5,'10pts'],
-      ['Cuartos',d.f6,'15pts'],
-      ['Semis',d.f7,'20pts'],
-      ['Campeón',d.f8,'45pts'],
-      ['Pichichi',d.pichi,'15pts'],
-      ...(d.bonus!==0?[['Bonus',d.bonus,'']]:[]),
-    ].filter(([,v])=>v!==0);
-    h+=`<div class="card" style="padding:10px 14px;margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:12px;color:var(--text2);font-weight:600">DESGLOSE DE PUNTOS</span>
-        <b style="color:var(--accent);font-size:20px;font-family:'Bebas Neue',sans-serif">${d.total} pts</b>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:4px">
-        ${desglose.map(([l,v,sub])=>`<div style="background:var(--surface2);border-radius:6px;padding:5px 8px">
-          <div style="font-size:10px;color:var(--text3)">${l}</div>
-          <div style="font-size:15px;font-weight:700;color:var(--accent);font-family:'Bebas Neue',sans-serif">${v} pts</div>
-          <div style="font-size:10px;color:var(--text3)">${sub}</div>
-        </div>`).join('')}
-      </div>
-    </div>`;
-  }
   h+=`<div class="sticky-tabs"><div class="tab-bar">
   ${tabs.map(t=>`<button class="tab${qtab===t.id?' active':''}" onclick="setQt('${t.id}')">${t.l}</button>`).join('')}
   </div></div>`;
@@ -669,12 +642,12 @@ function buildBracket(uid,isAdmin){
     h+=`<div class="bm${isEsp?' esp':''}">
       <div class="bm-slot${corrA?' correct':''}" onclick="${ro?'':fnA}">
         <span class="dot${winner===teamA&&teamA?' w':''}"></span>
-        <span class="tn${teamA?'':' empty'}">${teamA||labelA}</span>
+        <span class="tn${teamA?'':' empty'}">${teamA||labelA}${winner===teamA&&teamA?' <span style="font-size:10px;color:#fbbf24">★</span>':''}</span>
         <span class="lbl">${labelA}</span>
       </div>
       <div class="bm-slot${corrB?' correct':''}" onclick="${ro?'':fnA}">
         <span class="dot${winner===teamB&&teamB?' w':''}"></span>
-        <span class="tn${teamB?'':' empty'}">${teamB||labelB}</span>
+        <span class="tn${teamB?'':' empty'}">${teamB||labelB}${winner===teamB&&teamB?' <span style="font-size:10px;color:#fbbf24">★</span>':''}</span>
         <span class="lbl">${labelB}</span>
       </div>
     </div>`;
@@ -741,11 +714,11 @@ function buildFixedRound(titulo,ronda,matches,br,isAdmin,uid,prefix,srcPrefix,pt
     h+=`<div class="bm${isEsp?' esp':''}">
       <div class="bm-slot${teamA?'':' disabled'}${corrA?' correct':''}" onclick="${(!ro&&teamA&&teamB)?fn:''}">
         <span class="dot${winner===teamA&&teamA?' w':''}"></span>
-        <span class="tn${teamA?'':' empty'}">${teamA||'Pendiente'}</span>
+        <span class="tn${teamA?'':' empty'}">${teamA||'Pendiente'}${winner===teamA&&teamA?' <span style="font-size:10px;color:#fbbf24">★</span>':''}</span>
       </div>
       <div class="bm-slot${teamB?'':' disabled'}${corrB?' correct':''}" onclick="${(!ro&&teamA&&teamB)?fn:''}">
         <span class="dot${winner===teamB&&teamB?' w':''}"></span>
-        <span class="tn${teamB?'':' empty'}">${teamB||'Pendiente'}</span>
+        <span class="tn${teamB?'':' empty'}">${teamB||'Pendiente'}${winner===teamB&&teamB?' <span style="font-size:10px;color:#fbbf24">★</span>':''}</span>
       </div>
     </div>`;
   });
