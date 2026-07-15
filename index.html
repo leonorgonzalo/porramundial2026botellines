@@ -289,6 +289,7 @@ function syncFases(uid){
   p.f5=MATCH16.map(m=>br['w_'+m.id]||'').filter(Boolean);
   p.f6=OCT8.map(m=>br['w_'+m.id]||'').filter(Boolean);
   p.f7=CUA4.map(m=>br['w_'+m.id]||'').filter(Boolean);
+  p.ffin=SEM2.map(m=>br['w_'+m.id]||'').filter(Boolean);
   p.f8=br['w_f1']||p.f8||'';
 }
 
@@ -309,7 +310,7 @@ function calcPts(uid){
   // Cuadro + pichichi — solo si fase de grupos completa en resultados reales (o porra abierta)
   const gruposCompletos=Object.keys(r.quiniela||{}).length>=72;
   if(!isLocked()||gruposCompletos){
-    [{k:'f3',v:5},{k:'f4',v:5},{k:'f5',v:10},{k:'f6',v:15},{k:'f7',v:20}].forEach(({k,v})=>{
+    [{k:'f3',v:5},{k:'f4',v:5},{k:'f5',v:10},{k:'f6',v:15},{k:'f7',v:20},{k:'ffin',v:30}].forEach(({k,v})=>{
       (p[k]||[]).forEach(eq=>{if(eq&&(r[k]||[]).includes(eq))pts+=v;});
     });
     if(p.f8&&r.f8&&p.f8===r.f8) pts+=45;
@@ -327,7 +328,7 @@ function calcPtsDetalle(uid){
   const p=S.participants[uid],r=S.results;
   if(!p) return {};
   syncFases(uid);
-  const d={grupos:0,españa:0,f3:0,f4:0,f5:0,f6:0,f7:0,f8:0,pichi:0,bonus:0};
+  const d={grupos:0,españa:0,f3:0,f4:0,f5:0,f6:0,f7:0,ffin:0,f8:0,pichi:0,bonus:0};
   PARTIDOS.forEach((_,i)=>{
     if(p.quiniela?.['m'+i]&&r.quiniela?.['m'+i]&&p.quiniela['m'+i]===r.quiniela['m'+i]) d.grupos+=2;
   });
@@ -336,7 +337,7 @@ function calcPtsDetalle(uid){
   });
   const gruposCompletos=Object.keys(r.quiniela||{}).length>=72;
   if(!isLocked()||gruposCompletos){
-    [{k:'f3',v:5},{k:'f4',v:5},{k:'f5',v:10},{k:'f6',v:15},{k:'f7',v:20}].forEach(({k,v})=>{
+    [{k:'f3',v:5},{k:'f4',v:5},{k:'f5',v:10},{k:'f6',v:15},{k:'f7',v:20},{k:'ffin',v:30}].forEach(({k,v})=>{
       (p[k]||[]).forEach(eq=>{if(eq&&(r[k]||[]).includes(eq))d[k]+=v;});
     });
     if(p.f8&&r.f8&&p.f8===r.f8) d.f8+=45;
@@ -347,7 +348,7 @@ function calcPtsDetalle(uid){
     }
   }
   d.bonus=parseInt(S.bonus?.[uid]||0);
-  d.total=d.grupos+d.españa+d.f3+d.f4+d.f5+d.f6+d.f7+d.f8+d.pichi+d.bonus;
+  d.total=d.grupos+d.españa+d.f3+d.f4+d.f5+d.f6+d.f7+d.ffin+d.f8+d.pichi+d.bonus;
   return d;
 }
 function getRank(){
@@ -744,7 +745,18 @@ function buildBracket(uid,isAdmin){
   const elimForOct=new Set([...elimGroups]);
   const elimForCua=new Set([...elimGroups,...elimR16]);
   const elimForSem=new Set([...elimGroups,...elimR16,...elimOct]);
-  const elimForFin=new Set([...elimGroups,...elimR16,...elimOct,...elimCua]);
+  const elimSem=new Set();
+  if(showGreenBr&&(S.results?.ffin||[]).length>0){
+    SEM2.forEach(m=>{
+      const w=S.results?.bracket?.['w_'+m.id]||'';
+      if(!w) return;
+      const a=S.results?.bracket?.['w_'+m.a]||'';
+      const b=S.results?.bracket?.['w_'+m.b]||'';
+      if(a&&a!==w) elimSem.add(a);
+      if(b&&b!==w) elimSem.add(b);
+    });
+  }
+  const elimForFin=new Set([...elimGroups,...elimR16,...elimOct,...elimCua,...elimSem]);
 
   const allR16done=MATCH16.every(m=>br['w_'+m.id]);
   if(MATCH16.some(m=>br['w_'+m.id])){
@@ -785,10 +797,10 @@ function buildBracket(uid,isAdmin){
 function buildFixedRound(titulo,ronda,matches,br,isAdmin,uid,prefix,srcPrefix,pts,knownElim){
   const ro=!isAdmin&&RO;
   const showGreen=!isAdmin&&RO&&isLocked();
-  const rlistMap={oct:S.results?.f5||[],cua:S.results?.f6||[],sem:S.results?.f7||[]};
+  const rlistMap={oct:S.results?.f5||[],cua:S.results?.f6||[],sem:S.results?.f7||[],fin:S.results?.ffin||[]};
   const rlist=rlistMap[ronda]||[];
   const champ=S.results?.bracket?.['w_f1']||S.results?.f8||'';
-  const isCorr=t=>showGreen&&!!t&&(ronda==='fin'?t===champ:rlist.includes(t));
+  const isCorr=t=>showGreen&&!!t&&(ronda==='fin'?(S.results?.ffin||[]).includes(t):rlist.includes(t));
   // eliminated: propagated from previous rounds OR lost specific match
   const matchSrcMap={oct:OCT8,cua:CUA4,sem:SEM2,fin:FIN1};
   const srcMatches=matchSrcMap[ronda]||[];
@@ -967,6 +979,7 @@ function syncAdminFases(){
   r.f5=MATCH16.map(m=>br['w_'+m.id]||'').filter(Boolean);
   r.f6=OCT8.map(m=>br['w_'+m.id]||'').filter(Boolean);
   r.f7=CUA4.map(m=>br['w_'+m.id]||'').filter(Boolean);
+  r.ffin=SEM2.map(m=>br['w_'+m.id]||'').filter(Boolean);
   r.f8=br['w_f1']||r.f8||'';
 }
 
@@ -1102,6 +1115,7 @@ function renderPronosticos(){
     {key:'f5',label:'Octavos'},
     {key:'f6',label:'Cuartos'},
     {key:'f7',label:'Semis'},
+    {key:'ffin',label:'Finalistas'},
     {key:'f8',label:'Final/Campeón'},
   ];
   const counts={};
@@ -1230,7 +1244,8 @@ function renderAdminVer(){
     ['Octavos',d.f5,'10pts/equipo',jugadosA.f5+'/16'],
     ['Cuartos',d.f6,'15pts/equipo',jugadosA.f6+'/8'],
     ['Semis',d.f7,'20pts/equipo',jugadosA.f7+'/4'],
-    ['Campeón',d.f8,'45pts',jugadosA.f8+'/2'],
+    ['Finalistas',d.ffin,'30pts/equipo',(ra.ffin||[]).length+'/2'],
+    ['Campeón',d.f8,'45pts',ra.f8?'1/1':'0/1'],
     ['Pichichi',d.pichi,'15pts',''],
     ...(d.bonus!==0?[['Bonus manual',d.bonus,'','']]:[]),
   ].filter(([,v])=>v!==0);
